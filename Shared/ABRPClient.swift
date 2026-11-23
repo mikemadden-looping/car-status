@@ -22,7 +22,10 @@ enum ABRPClient {
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0
 
         if let status = jsonValue(json, "status") as? String, status != "ok" {
-            throw CarError.badResponse("ABRP: \(status) \(jsonValue(json, "error") ?? "")")
+            let reason = ["error", "message", "msg", "errors", "detail"]
+                .compactMap { jsonValue(json, $0).map { "\($0)" } }
+                .first ?? String(raw.prefix(200))
+            throw CarError.badResponse("ABRP (HTTP \(code)): \(reason)")
         }
         guard code == 200, let tlm = findTelemetry(in: json) else {
             throw CarError.badResponse("ABRP returned no telemetry (HTTP \(code)). See Diagnostics.")
