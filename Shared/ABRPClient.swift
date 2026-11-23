@@ -6,58 +6,24 @@ enum ABRPClient {
     /// Last raw reply (with HTTP status), kept even when the request fails, for Diagnostics.
     nonisolated(unsafe) static var lastRaw: String?
 
-    private enum RequestStyle: String, CaseIterable {
-        case headerKeyPostToken = "key in header, token in POST body"
-        case headerKeyQueryToken = "key in header, token in URL"
-        case queryOnly = "key and token in URL"
-
-        func request(apiKey: String, token: String) -> URLRequest {
-            let base = "https://api.iternio.com/1/tlm/get_telemetry"
-            var c = URLComponents(string: base)!
-            switch self {
-            case .headerKeyPostToken:
-                var r = URLRequest(url: c.url!, timeoutInterval: 15)
-                r.httpMethod = "POST"
-                r.setValue("APIKEY \(apiKey)", forHTTPHeaderField: "Authorization")
-                r.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-                var form = URLComponents()
-                form.queryItems = [URLQueryItem(name: "token", value: token)]
-                r.httpBody = form.percentEncodedQuery?.data(using: .utf8)
-                return r
-            case .headerKeyQueryToken:
-                c.queryItems = [URLQueryItem(name: "token", value: token)]
-                var r = URLRequest(url: c.url!, timeoutInterval: 15)
-                r.setValue("APIKEY \(apiKey)", forHTTPHeaderField: "Authorization")
-                return r
-            case .queryOnly:
-                c.queryItems = [URLQueryItem(name: "token", value: token),
-                                URLQueryItem(name: "api_key", value: apiKey)]
-                return URLRequest(url: c.url!, timeoutInterval: 15)
-            }
-        }
-    }
-
     static func fetch() async throws -> (CarStatus, raw: String) {
         guard let apiKey = Keychain.string(Keys.abrpAPIKey),
               let token = Keychain.string(Keys.abrpUserToken) else {
             throw CarError.notSetUp("ABRP")
         }
-        // ABRP's docs don't pin down how get_telemetry wants credentials, so try
-        // the known styles in turn and stop at the first one that isn't a 401.
-        var attempts: [(String, Data, Int)] = []
-        for style in RequestStyle.allCases {
-            let (data, response) = try await URLSession.shared.data(for: style.request(apiKey: apiKey, token: token))
-            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            attempts.append((style.rawValue, data, code))
-            if code != 401 && code != 403 { break }
-        }
-        let (_, data, code) = attempts.last!
+        var components = URLComponents(string: "https://api.iternio.com/1/tlm/get_telemetry")!
+        components.queryItems = [
+            URLQueryItem(name: "token", value: token),
+            URLQueryItem(name: "api_key", value: apiKey),
+        ]
+        var request = URLRequest(url: components.url!, timeoutInterval: 15)
+        request.setValue("APIKEY \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
         let raw = String(data: data, encoding: .utf8) ?? ""
         let json = try? JSONSerialization.jsonObject(with: data)
-        lastRaw = attempts.map { name, d, c in
-            let body = String(data: d, encoding: .utf8) ?? ""
-            return "[\(name)] HTTP \(c)\n\(body.isEmpty ? "(empty reply)" : body)"
-        }.joined(separator: "\n\n")
+        let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+        lastRaw = "HTTP \(code)\n\(raw.isEmpty ? "(empty reply)" : raw)"
 
         if let status = jsonValue(json, "status") as? String, status != "ok" {
             let reason = ["errortext", "error", "message", "msg", "errors", "detail"]
