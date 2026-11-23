@@ -43,7 +43,7 @@ jobs:
           fi
 
   build:
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - name: Check secrets
         run: |
@@ -60,9 +60,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          XCODE=$(ls -d /Applications/Xcode_27*.app | grep -iv beta | sort -V | tail -1)
           echo "Using $XCODE"
           sudo xcode-select --switch "$XCODE/Contents/Developer"
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i iphoneos
 
       - name: Generate Xcode project
         run: |
