@@ -8,6 +8,8 @@ struct SettingsView: View {
     @State private var kiaPassword = Keychain.string(Keys.kiaPassword) ?? ""
     @State private var abrpKey = Keychain.string(Keys.abrpAPIKey) ?? ""
     @State private var abrpToken = Keychain.string(Keys.abrpUserToken) ?? ""
+    @State private var id4Capacity = Keychain.string(Keys.id4CapacityKWh) ?? ""
+    @State private var ev3Capacity = Keychain.string(Keys.ev3CapacityKWh) ?? ""
 
     @State private var challenge: KiaClient.OTPChallenge?
     @State private var code = ""
@@ -72,6 +74,23 @@ struct SettingsView: View {
                     Text("The API key is the one Iternio emailed you. The user token comes from ABRP's Live Data setup for your ID.4 (the Generic / API token option).")
                 }
 
+                Section {
+                    LabeledContent("ID.4") {
+                        TextField("\(Efficiency.defaultID4Capacity, specifier: "%.1f")", text: $id4Capacity)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    LabeledContent("EV3") {
+                        TextField("\(Efficiency.defaultEV3Capacity, specifier: "%.1f")", text: $ev3Capacity)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                } header: {
+                    Text("Usable battery (kWh)")
+                } footer: {
+                    Text("Used to turn battery-percent drops into kWh for the kWh/mi figure. Leave blank for the defaults: 77 kWh for the 2021 ID.4 Pro S, 81.4 kWh for the EV3 Land.")
+                }
+
                 Section("Diagnostics") {
                     NavigationLink("Last ABRP reply") { RawView(title: "ABRP", text: model.abrpRaw) }
                     NavigationLink("Last Kia reply") { RawView(title: "Kia", text: model.kiaRaw) }
@@ -93,6 +112,8 @@ struct SettingsView: View {
         Keychain.set(kiaPassword, for: Keys.kiaPassword)
         Keychain.set(abrpKey, for: Keys.abrpAPIKey)
         Keychain.set(abrpToken, for: Keys.abrpUserToken)
+        Keychain.set(Double(id4Capacity).map { String($0) }, for: Keys.id4CapacityKWh)
+        Keychain.set(Double(ev3Capacity).map { String($0) }, for: Keys.ev3CapacityKWh)
     }
 
     private func run(_ work: @escaping () async throws -> Void) {

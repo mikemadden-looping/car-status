@@ -11,7 +11,9 @@ enum StatusStore {
     static func refresh() async -> Result {
         async let id4 = attempt { try await ABRPClient.fetch() }
         async let ev3 = attempt { try await KiaClient.shared.fetch() }
-        let (a, k) = await (id4, ev3)
+        var (a, k) = await (id4, ev3)
+        if a.car != nil { Efficiency.apply(to: &a.car!, anchorKey: Keys.id4Anchor) }
+        if k.car != nil { Efficiency.apply(to: &k.car!, anchorKey: Keys.ev3Anchor) }
 
         let previous = Snapshot.cached
         var snapshot = Snapshot()

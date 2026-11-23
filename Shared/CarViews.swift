@@ -4,6 +4,21 @@ extension CarStatus {
     var percentText: String { batteryPercent.map { "\(Int($0.rounded()))%" } ?? "—" }
     var rangeText: String? { rangeMiles.map { "\(Int($0.rounded())) mi" } }
 
+    /// "0.29 kWh/mi", or nil until there are enough miles since the last charge.
+    var efficiencyText: String? {
+        kwhPerMile.map { String(format: "%.2f kWh/mi", $0) }
+    }
+
+    var sinceChargeText: String? {
+        guard let miles = milesSinceCharge else { return nil }
+        let m = Int(miles.rounded())
+        if let e = efficiencyText { return "\(e) over \(m) mi since charge" }
+        if odometerMiles != nil && isCharging != true && m < Int(Efficiency.minimumMiles) {
+            return "kWh/mi shows after \(Int(Efficiency.minimumMiles)) mi since charge (\(m) so far)"
+        }
+        return nil
+    }
+
     var stateText: String {
         if isCharging == true {
             if let m = chargeMinutesLeft { return "Charging · \(m / 60)h \(m % 60)m left" }

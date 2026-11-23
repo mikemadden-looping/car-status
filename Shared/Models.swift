@@ -10,6 +10,12 @@ struct CarStatus: Codable, Equatable {
     var isLocked: Bool?
     var climateOn: Bool?
     var chargeMinutesLeft: Int?
+    var odometerMiles: Double?
+    /// Energy left in the pack, when the source reports it directly (ABRP's "soe").
+    var energyKWh: Double?
+    /// Miles driven since the last charge, and average consumption over them.
+    var milesSinceCharge: Double?
+    var kwhPerMile: Double?
     /// When the car last reported this data.
     var reportedAt: Date?
     /// When this app last fetched successfully.

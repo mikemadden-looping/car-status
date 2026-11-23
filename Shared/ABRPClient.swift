@@ -32,6 +32,8 @@ enum ABRPClient {
         car.batteryPercent = jsonNumber(tlm["soc"])
         if let km = jsonNumber(tlm["est_battery_range"]) { car.rangeMiles = km / 1.609344 }
         car.isCharging = jsonBool(tlm["is_charging"])
+        if let km = jsonNumber(tlm["odometer"]), km > 0 { car.odometerMiles = km / 1.609344 }
+        car.energyKWh = jsonNumber(tlm["soe"])
         if let utc = jsonNumber(tlm["utc"]) {
             // epoch seconds per the docs; tolerate milliseconds too
             car.reportedAt = Date(timeIntervalSince1970: utc > 10_000_000_000 ? utc / 1000 : utc)

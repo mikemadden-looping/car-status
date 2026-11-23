@@ -102,11 +102,24 @@ private struct MediumCar: View {
                   systemImage: car.stateIcon)
                 .font(.caption)
                 .foregroundStyle(car.isCharging == true ? .green : .secondary)
-            if let when = car.reportedAt {
-                Text(when, style: .relative).font(.caption2).foregroundStyle(.tertiary)
-            }
+            footer
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// "0.29 kWh/mi · 12 min" — consumption since charge, then how old the data is.
+    private var footer: Text {
+        let age = car.reportedAt.map { Text($0, style: .relative) }
+        switch (car.efficiencyText, age) {
+        case let (e?, a?): return Text(e) + Text(" · ") + a
+        case let (e?, nil): return Text(e)
+        case let (nil, a?): return a
+        default: return Text(" ")
+        }
     }
 }
 

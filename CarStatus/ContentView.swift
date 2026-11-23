@@ -57,6 +57,10 @@ struct CarCard: View {
             BatteryBar(car: car)
             Label(car.stateText, systemImage: car.stateIcon)
                 .foregroundStyle(car.isCharging == true ? .green : .primary)
+            if let since = car.sinceChargeText {
+                Label(since, systemImage: "gauge.with.dots.needle.33percent")
+                    .font(.subheadline)
+            }
             if car.climateOn == true {
                 Label("Climate on", systemImage: "fan.fill")
             }

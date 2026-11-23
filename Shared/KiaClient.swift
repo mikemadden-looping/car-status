@@ -270,6 +270,9 @@ final class KiaClient {
             let unit = Int(jsonNumber(jsonValue(state, "\(vs).evStatus.drvDistance.0.rangeByFuel.evModeRange.unit")) ?? 3)
             car.rangeMiles = unit == 1 ? range / 1.609344 : range
         }
+        if let miles = jsonNumber(jsonValue(state, "vehicleConfig.vehicleDetail.vehicle.mileage")), miles > 0 {
+            car.odometerMiles = miles
+        }
         if let minutes = jsonNumber(jsonValue(state, "\(vs).evStatus.remainChargeTime.0.timeInterval.value")), minutes > 0 {
             car.chargeMinutesLeft = Int(minutes)
         }

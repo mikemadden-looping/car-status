@@ -78,4 +78,8 @@ enum Keys {
     static let abrpAPIKey = "abrp.apiKey"
     static let abrpUserToken = "abrp.userToken"
     static let snapshot = "status.snapshot"
+    static let id4Anchor = "efficiency.id4.anchor"
+    static let ev3Anchor = "efficiency.ev3.anchor"
+    static let id4CapacityKWh = "efficiency.id4.capacity"
+    static let ev3CapacityKWh = "efficiency.ev3.capacity"
 }

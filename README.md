@@ -49,10 +49,24 @@ Settings (gear, top right):
   here.
 - **ABRP**: the Telemetry API key from Iternio, plus your ABRP user token for
   the ID.4 from ABRP's Live Data setup.
+- **Usable battery (kWh)**: what the kWh/mi figure assumes (defaults: 77 for
+  the ID.4, 81.4 for the EV3).
 - **Diagnostics**: the last raw reply from each service, with a share button,
   for fixing things if a number looks wrong.
 
 Your wife can install the same TestFlight build and sign in on her phone.
+
+## kWh per mile since charge
+
+Neither source reports consumption, so the app works it out: whenever a car
+is seen charging (or its battery level has gone up), it saves the odometer
+and battery level. After that, kWh/mi = (battery % dropped × usable kWh) ÷
+miles driven, or for the ID.4 the drop in ABRP's reported kWh when ABRP
+sends that. It counts everything the car used, climate and overnight drain
+included. It appears once a car has gone 10 miles since charging, because
+battery levels come in whole percents (about 0.8 kWh each). If a charge
+starts and finishes between refreshes, the app only notices it once the
+battery level has gone up.
 
 ## Notes
 
