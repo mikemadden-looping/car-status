@@ -9,6 +9,7 @@ enum StatusStore {
     }
 
     static func refresh() async -> Result {
+        ABRPClient.lastRaw = nil
         async let id4 = attempt { try await ABRPClient.fetch() }
         async let ev3 = attempt { try await KiaClient.shared.fetch() }
         var (a, k) = await (id4, ev3)
@@ -20,7 +21,7 @@ enum StatusStore {
         snapshot.id4 = merge(a.car, a.error, previous?.id4, name: "ID.4")
         snapshot.ev3 = merge(k.car, k.error, previous?.ev3, name: "EV3")
         Keychain.set(codable: snapshot, for: Keys.snapshot)
-        return Result(snapshot: snapshot, abrpRaw: a.raw ?? a.error, kiaRaw: KiaClient.shared.lastRaw ?? k.error)
+        return Result(snapshot: snapshot, abrpRaw: ABRPClient.lastRaw ?? a.error, kiaRaw: KiaClient.shared.lastRaw ?? k.error)
     }
 
     private static func attempt(_ work: () async throws -> (CarStatus, raw: String)) async

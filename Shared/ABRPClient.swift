@@ -3,6 +3,9 @@ import Foundation
 /// Reads the ID.4's latest live data from A Better Routeplanner's Telemetry API
 /// (`get_telemetry`), which ABRP gets from the car through its Enode link.
 enum ABRPClient {
+    /// Last raw reply (with HTTP status), kept even when the request fails, for Diagnostics.
+    nonisolated(unsafe) static var lastRaw: String?
+
     static func fetch() async throws -> (CarStatus, raw: String) {
         guard let apiKey = Keychain.string(Keys.abrpAPIKey),
               let token = Keychain.string(Keys.abrpUserToken) else {
@@ -20,6 +23,7 @@ enum ABRPClient {
         let raw = String(data: data, encoding: .utf8) ?? ""
         let json = try? JSONSerialization.jsonObject(with: data)
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+        lastRaw = "HTTP \(code)\n\(raw.isEmpty ? "(empty reply)" : raw)"
 
         if let status = jsonValue(json, "status") as? String, status != "ok" {
             let reason = ["error", "message", "msg", "errors", "detail"]
