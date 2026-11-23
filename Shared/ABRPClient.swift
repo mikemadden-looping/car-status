@@ -44,6 +44,20 @@ enum ABRPClient {
         if let utc = jsonNumber(tlm["utc"]) {
             // epoch seconds per the docs; tolerate milliseconds too
             car.reportedAt = Date(timeIntervalSince1970: utc > 10_000_000_000 ? utc / 1000 : utc)
+        } else if let stamp = jsonValue(json, "result.timestamp") as? String {
+            // e.g. "2026-11-22 22:58:08+00:00"
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.dateFormat = "yyyy-MM-dd HH:mm:ssXXXXX"
+            car.reportedAt = f.date(from: stamp)
+        }
+        // ABRP (via Enode) sends no range for the ID.4, but it does send its
+        // calibrated consumption in Wh/km, so estimate from that.
+        if car.rangeMiles == nil, let soc = car.batteryPercent,
+           let whPerKm = jsonNumber(tlm["calib_ref_cons"]), whPerKm > 0 {
+            let kWh = car.energyKWh ?? soc / 100 * Efficiency.capacity(for: Keys.id4Anchor)
+            car.rangeMiles = kWh * 1000 / whPerKm / 1.609344
+            car.rangeIsEstimate = true
         }
         car.fetchedAt = .now
         return (car, raw)

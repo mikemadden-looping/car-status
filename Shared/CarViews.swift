@@ -2,7 +2,7 @@ import SwiftUI
 
 extension CarStatus {
     var percentText: String { batteryPercent.map { "\(Int($0.rounded()))%" } ?? "—" }
-    var rangeText: String? { rangeMiles.map { "\(Int($0.rounded())) mi" } }
+    var rangeText: String? { rangeMiles.map { "\(rangeIsEstimate == true ? "~" : "")\(Int($0.rounded())) mi" } }
 
     /// "0.29 kWh/mi", or nil until there are enough miles since the last charge.
     var efficiencyText: String? {

@@ -5,6 +5,8 @@ struct CarStatus: Codable, Equatable {
     var name: String
     var batteryPercent: Double?
     var rangeMiles: Double?
+    /// True when the range is the app's estimate rather than the car's.
+    var rangeIsEstimate: Bool?
     var isCharging: Bool?
     var isPluggedIn: Bool?
     var isLocked: Bool?
