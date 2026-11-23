@@ -1,0 +1,13 @@
+*.xcodeproj/
+CarStatus/Info.plist
+CarStatus/CarStatus.entitlements
+CarStatusWidget/Info.plist
+CarStatusWidget/CarStatusWidget.entitlements
+build/
+buildlog/
+*.ipa
+*.dSYM.zip
+*.mobileprovision
+fastlane/report.xml
+fastlane/README.md
+.DS_Store
