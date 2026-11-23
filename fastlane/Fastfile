@@ -95,11 +95,18 @@ platform :ios do
 
   desc "Upload to TestFlight"
   lane :release do
-    upload_to_testflight(
-      api_key: api_key!,
-      ipa: "CarStatus.ipa",
-      skip_waiting_for_build_processing: true,
-      changelog: "Built from commit #{last_git_commit[:abbreviated_commit_hash]}"
-    )
+    begin
+      upload_to_testflight(
+        api_key: api_key!,
+        ipa: "CarStatus.ipa",
+        skip_waiting_for_build_processing: true,
+        changelog: "Built from commit #{last_git_commit[:abbreviated_commit_hash]}"
+      )
+    rescue => e
+      # Xcode 27's uploader logs this harmless message after "UPLOAD SUCCEEDED",
+      # and fastlane treats it as a failure.
+      raise unless e.message.include?("CDUploaderStateInfoResumeFilePath")
+      UI.important("Ignoring Xcode 27 uploader warning; the upload itself succeeded.")
+    end
   end
 end
