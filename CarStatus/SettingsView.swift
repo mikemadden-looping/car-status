@@ -71,7 +71,7 @@ struct SettingsView: View {
                 } header: {
                     Text("ABRP (ID.4)")
                 } footer: {
-                    Text("The API key is the one Iternio emailed you. The user token comes from ABRP's Live Data setup for your ID.4 (the Generic / API token option).")
+                    Text("API key: create one at abetterrouteplanner.com → API Keys. User token: in the ABRP app, your ID.4 → Live Data → Custom/Generic connection.")
                 }
 
                 Section {
